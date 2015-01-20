@@ -54,7 +54,7 @@ print("made it past problem setup")
 
 
 x_basis = de.Fourier(128, interval=(0, 1), dealias=2/3)
-z_basis = de.Chebyshev(128,interval=(-2,2),dealias=2/3)
+z_basis = de.Chebyshev(128,interval=(0,4),dealias=2/3)
 domain = de.Domain([x_basis,z_basis], grid_dtype = np.float64)
 problem.expand(domain)
 
@@ -63,7 +63,7 @@ solver = de.solvers.IVP(problem, domain, de.timesteppers.SBDF3)
 
 solver.stop_sim_time = np.inf
 solver.stop_wall_time = np.inf
-solver.stop_iteration = 1000
+solver.stop_iteration = 5000
 
 x = domain.grid(0) 
 z = domain.grid(1)
@@ -72,9 +72,10 @@ w = solver.state['w']
 #
 #DEFINES INTIAL CONITIONS
 #
-
-#w['g'] = np.exp(-(pow((x-.5),2) + pow((z-.5),2)))*np.cos(1.57*x + 1.57*z)
-w['g'] = np.cos(1.57*x + 1.57*z)
+alpha = 10
+w_v = 8*(np.pi/2)
+w['g'] = np.exp(-alpha*(pow((x-.5),2) + 4*pow((z-2),2)))*np.cos(w_v*x + w_v*z)
+#w['g'] = np.cos(1.57*x + 1.57*z)
 
 # Setup storage
 w_list = [np.copy(w['g'])]
@@ -106,7 +107,7 @@ plt.axis(plot_tools.pad_limits(xmesh, ymesh))
 plt.xlabel('x')
 plt.ylabel('z')
 plt.title('internal wave')
-for i in range(0,50):
+for i in range(0,250):
     if i == 0:
         p = plt.pcolormesh(xmesh, ymesh, w_array[i].T, cmap='RdBu_r')
         plt.colorbar()
